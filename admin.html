@@ -313,94 +313,6 @@
             gap: 10px;
         }
 
-        /* 登录页面样式 */
-        .login-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f0f2f5 0%, #e6f7ff 100%);
-        }
-
-        .login-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-header h1 {
-            font-size: 28px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .login-header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .login-form {
-            margin-bottom: 20px;
-        }
-
-        .btn-block {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .login-error {
-            background: #fff2f0;
-            border: 1px solid #ffccc7;
-            color: #ff4d4f;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        /* 系统信息样式 */
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            border-left: 3px solid #1890ff;
-        }
-
-        .info-item label {
-            font-weight: 500;
-            color: #333;
-        }
-
-        .info-item span {
-            color: #666;
-            font-family: monospace;
-            font-size: 13px;
-        }
-
         /* 响应式 */
         @media (max-width: 768px) {
             .sidebar {
@@ -410,43 +322,11 @@
             .content-area {
                 padding: 15px;
             }
-
-            .login-card {
-                margin: 20px;
-                padding: 30px;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- 登录页面 -->
-    <div id="login-container" class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h1>管理系统登录</h1>
-                <p>请输入您的账号和密码</p>
-            </div>
-            <form id="login-form" class="login-form">
-                <div class="form-group">
-                    <label class="form-label">用户名</label>
-                    <input type="text" class="form-input" id="username" placeholder="请输入用户名" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">密码</label>
-                    <input type="password" class="form-input" id="password" placeholder="请输入密码" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">登录</button>
-            </form>
-            <div id="login-error" class="login-error" style="display: none;"></div>
-        </div>
-    </div>
-
-    <!-- 管理系统主界面 -->
-    <div id="admin-container" class="admin-container" style="display: none;">
+    <div class="admin-container">
         <!-- 侧边栏 -->
         <div class="sidebar">
             <div class="sidebar-header">
@@ -490,7 +370,6 @@
                 <div class="user-info">
                     <div class="user-avatar">A</div>
                     <span>管理员</span>
-                    <button class="btn btn-secondary" onclick="logout()" style="margin-left: 10px;">退出</button>
                 </div>
             </div>
 
@@ -602,65 +481,10 @@
                     </div>
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">系统信息</h3>
+                            <h3 class="card-title">基本设置</h3>
                         </div>
                         <div class="card-body">
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <label>当前域名:</label>
-                                    <span id="current-hostname">-</span>
-                                </div>
-                                <div class="info-item">
-                                    <label>API地址:</label>
-                                    <span id="current-api-base">-</span>
-                                </div>
-                                <div class="info-item">
-                                    <label>运行模式:</label>
-                                    <span id="current-mode">-</span>
-                                </div>
-                                <div class="info-item">
-                                    <label>登录状态:</label>
-                                    <span id="login-status">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">故障排除</h3>
-                        </div>
-                        <div class="card-body">
-                            <p><strong>如果在自定义域名下登录无反应，可能的原因：</strong></p>
-                            <ul>
-                                <li>JavaScript加载或执行错误</li>
-                                <li>DOM元素未正确加载</li>
-                                <li>事件绑定失败</li>
-                                <li>浏览器兼容性问题</li>
-                            </ul>
-                            <p><strong>解决方案：</strong></p>
-                            <ul>
-                                <li>检查浏览器控制台是否有错误信息</li>
-                                <li>使用下方的测试功能诊断问题</li>
-                                <li>尝试刷新页面或清除浏览器缓存</li>
-                                <li>在不同浏览器中测试</li>
-                            </ul>
-                            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
-                                <h4 style="margin-bottom: 10px;">🔧 诊断工具</h4>
-                                <p>以下工具可以帮助您诊断系统状态和数据连接：</p>
-                                <button class="btn btn-primary" onclick="runDiagnostics()" style="margin-right: 10px;">🔍 运行诊断</button>
-                                <button class="btn btn-secondary" onclick="testLogin()" style="margin-right: 10px;">🧪 测试登录功能</button>
-                                <button class="btn btn-secondary" onclick="testApiConnection()" style="margin-right: 10px;">🌐 测试API连接</button>
-                                <button class="btn btn-secondary" onclick="clearStorage()">🗑️ 清除本地存储</button>
-                                <div style="margin-top: 15px; padding: 10px; background: white; border-radius: 4px;">
-                                    <p><strong>📊 数据来源说明：</strong></p>
-                                    <ul>
-                                        <li>✅ 用户数据：从KV存储获取真实用户信息</li>
-                                        <li>✅ 操作记录：从KV存储获取真实操作日志</li>
-                                        <li>⚠️ 如果API连接失败，请检查后端服务状态</li>
-                                    </ul>
-                                </div>
-                                <div id="diagnostic-results" style="margin-top: 15px; padding: 10px; background: white; border-radius: 4px; display: none;"></div>
-                            </div>
+                            <p>系统设置功能正在开发中...</p>
                         </div>
                     </div>
                 </div>
