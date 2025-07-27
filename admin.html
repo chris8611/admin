@@ -370,6 +370,12 @@
                 <div class="user-info">
                     <div class="user-avatar">A</div>
                     <span>管理员</span>
+                    <button class="btn btn-secondary" onclick="logout()" style="margin-left: 10px; padding: 6px 12px; font-size: 12px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.59L17,17L22,12L17,7M4,5H12V3H4C2.89,3 2,3.89 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z"/>
+                        </svg>
+                        退出
+                    </button>
                 </div>
             </div>
 
@@ -534,6 +540,42 @@
         </div>
     </div>
 
-    <script src="admin.js"></script>
+    <script>
+        // 检查登录状态
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn');
+            const loginTime = parseInt(localStorage.getItem('adminLoginTime') || '0');
+            const currentTime = Date.now();
+            const sessionDuration = 24 * 60 * 60 * 1000; // 24小时
+            
+            if (isLoggedIn !== 'true' || currentTime - loginTime > sessionDuration) {
+                // 未登录或会话过期，跳转到登录页面
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminLoginTime');
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+        
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminLoginTime');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // 页面加载时检查登录状态
+        if (!checkLoginStatus()) {
+            // 如果未登录，停止加载其他脚本
+        } else {
+            // 已登录，加载管理系统脚本
+            const script = document.createElement('script');
+            script.src = 'admin.js';
+            document.head.appendChild(script);
+        }
+    </script>
 </body>
 </html>
