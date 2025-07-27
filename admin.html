@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .admin-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1890ff 0%, #096dd9 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(255,255,255,0.1);
+            border-left-color: #fff;
+        }
+
+        .menu-item.active {
+            background-color: rgba(255,255,255,0.15);
+            border-left-color: #fff;
+        }
+
+        .menu-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部导航 */
+        .top-nav {
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .breadcrumb {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1890ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        /* 内容区域 */
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-danger {
+            background: #ff4d4f;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff7875;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e6e6e6;
+        }
+
+        /* 表格样式 */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .table th {
+            background: #fafafa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .content-area {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>管理系统</h1>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-page="dashboard">
+                    <svg class="menu-icon" viewBox="0 0 24 24">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                    </svg>
+                    <span>仪表盘</span>
+                </div>
+                <div class="menu-item" data-page="users">
+                    <svg class="menu-icon" viewBox="0 0 24 24">
+                        <path d="M16 7c0-2.21-1.79-4-4-4S8 4.79 8 7s1.79 4 4 4 4-1.79 4-4zm-4 6c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    <span>用户管理</span>
+                </div>
+                <div class="menu-item" data-page="settings">
+                    <svg class="menu-icon" viewBox="0 0 24 24">
+                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                    </svg>
+                    <span>系统设置</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 顶部导航 -->
+            <div class="top-nav">
+                <div class="breadcrumb">
+                    <span id="breadcrumb-text">仪表盘</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <span>管理员</span>
+                </div>
+            </div>
+
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <!-- 仪表盘页面 -->
+                <div id="dashboard-page" class="page">
+                    <div class="page-header">
+                        <h1 class="page-title">仪表盘</h1>
+                        <p class="page-description">系统概览和统计信息</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">欢迎使用管理系统</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>这是一个基于Cloudflare Worker的管理系统，采用SpringBoot风格的界面设计。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理页面 -->
+                <div id="users-page" class="page" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">用户管理</h1>
+                        <p class="page-description">管理系统用户信息</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">用户列表</h3>
+                            <button class="btn btn-primary" onclick="showAddUserModal()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                                添加用户
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <table class="table" id="users-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>昵称</th>
+                                        <th>手机号</th>
+                                        <th>邮箱</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-tbody">
+                                    <!-- 用户数据将在这里动态加载 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统设置页面 -->
+                <div id="settings-page" class="page" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">系统设置</h1>
+                        <p class="page-description">配置系统参数</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">基本设置</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>系统设置功能正在开发中...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑用户模态框 -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">添加用户</h3>
+                <button class="modal-close" onclick="hideUserModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="user-form">
+                    <div class="form-group">
+                        <label class="form-label">昵称 *</label>
+                        <input type="text" class="form-input" id="user-nickname" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">手机号</label>
+                        <input type="tel" class="form-input" id="user-phone">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">邮箱</label>
+                        <input type="email" class="form-input" id="user-email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">地址</label>
+                        <input type="text" class="form-input" id="user-address">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">个性签名</label>
+                        <input type="text" class="form-input" id="user-signature">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideUserModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveUser()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

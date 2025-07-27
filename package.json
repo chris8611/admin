@@ -1,0 +1,13 @@
+{
+  "name": "admin-system",
+  "version": "1.0.0",
+  "description": "管理系统前端",
+  "main": "admin.html",
+  "scripts": {
+    "build": "echo 'No build step required'",
+    "dev": "python3 -m http.server 8080"
+  },
+  "keywords": ["admin", "management", "cloudflare"],
+  "author": "Your Name",
+  "license": "MIT"
+}
