@@ -450,7 +450,7 @@
                                     </svg>
                                     刷新
                                 </button>
-                                <button class="btn btn-danger" onclick="clearOperations()">
+                                <button class="btn btn-danger" id="clear-operations-btn">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
                                     </svg>
@@ -582,6 +582,17 @@
             // 已登录，加载管理系统脚本
             const script = document.createElement('script');
             script.src = 'admin.js';
+            script.onload = function() {
+                // admin.js加载完成后绑定清空按钮事件
+                const clearBtn = document.getElementById('clear-operations-btn');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', function() {
+                        if (typeof clearOperations === 'function') {
+                            clearOperations();
+                        }
+                    });
+                }
+            };
             document.head.appendChild(script);
         }
     </script>

@@ -4,7 +4,10 @@ class AdminSystem {
         this.currentPage = 'dashboard';
         this.users = [];
         this.editingUserId = null;
-        this.apiBase = 'https://backend.hackpro.tech';
+        // 根据当前环境设置API基础URL
+        this.apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8787' // 本地开发环境
+            : 'https://backend.hackpro.tech'; // 生产环境
         this.token = localStorage.getItem('admin_token');
         
         // 确保DOM加载完成后再初始化
