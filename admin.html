@@ -313,6 +313,65 @@
             gap: 10px;
         }
 
+        /* 登录页面样式 */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0f2f5 0%, #e6f7ff 100%);
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .login-form {
+            margin-bottom: 20px;
+        }
+
+        .btn-block {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-error {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #ff4d4f;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+        }
+
         /* 响应式 */
         @media (max-width: 768px) {
             .sidebar {
@@ -322,11 +381,39 @@
             .content-area {
                 padding: 15px;
             }
+
+            .login-card {
+                margin: 20px;
+                padding: 30px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="admin-container">
+    <!-- 登录页面 -->
+    <div id="login-container" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>管理系统登录</h1>
+                <p>请输入您的账号和密码</p>
+            </div>
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="password" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">登录</button>
+            </form>
+            <div id="login-error" class="login-error" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- 管理系统主界面 -->
+    <div id="admin-container" class="admin-container" style="display: none;">
         <!-- 侧边栏 -->
         <div class="sidebar">
             <div class="sidebar-header">
@@ -344,6 +431,12 @@
                         <path d="M16 7c0-2.21-1.79-4-4-4S8 4.79 8 7s1.79 4 4 4 4-1.79 4-4zm-4 6c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
                     </svg>
                     <span>用户管理</span>
+                </div>
+                <div class="menu-item" data-page="operations">
+                    <svg class="menu-icon" viewBox="0 0 24 24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                    <span>操作记录</span>
                 </div>
                 <div class="menu-item" data-page="settings">
                     <svg class="menu-icon" viewBox="0 0 24 24">
@@ -364,6 +457,7 @@
                 <div class="user-info">
                     <div class="user-avatar">A</div>
                     <span>管理员</span>
+                    <button class="btn btn-secondary" onclick="logout()" style="margin-left: 10px;">退出</button>
                 </div>
             </div>
 
@@ -406,6 +500,7 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>头像</th>
                                         <th>昵称</th>
                                         <th>手机号</th>
                                         <th>邮箱</th>
@@ -417,6 +512,51 @@
                                     <!-- 用户数据将在这里动态加载 -->
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作记录页面 -->
+                <div id="operations-page" class="page" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">操作记录</h1>
+                        <p class="page-description">查看所有设备操作记录</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">操作记录列表</h3>
+                            <button class="btn btn-primary" onclick="refreshOperations()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+                                </svg>
+                                刷新
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="operations-loading" style="text-align: center; padding: 20px; display: none;">
+                                <p>正在加载操作记录...</p>
+                            </div>
+                            <div id="operations-error" style="text-align: center; padding: 20px; color: #ff4d4f; display: none;">
+                                <p>加载操作记录失败，请稍后重试</p>
+                            </div>
+                            <table class="table" id="operations-table" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>操作类型</th>
+                                        <th>设备ID</th>
+                                        <th>操作时间</th>
+                                        <th>执行状态</th>
+                                        <th>用户代理</th>
+                                        <th>记录时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="operations-tbody">
+                                    <!-- 操作记录数据将在这里动态加载 -->
+                                </tbody>
+                            </table>
+                            <div id="operations-empty" style="text-align: center; padding: 40px; color: #999; display: none;">
+                                <p>暂无操作记录</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -468,6 +608,10 @@
                     <div class="form-group">
                         <label class="form-label">个性签名</label>
                         <input type="text" class="form-input" id="user-signature">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">头像URL</label>
+                        <input type="url" class="form-input" id="user-avatar" placeholder="请输入头像图片链接">
                     </div>
                 </form>
             </div>

@@ -1,3 +1,87 @@
+// 登录功能
+class LoginManager {
+    constructor() {
+        this.isLoggedIn = localStorage.getItem('admin_logged_in') === 'true';
+        this.init();
+    }
+
+    init() {
+        if (this.isLoggedIn) {
+            this.showAdminPanel();
+        } else {
+            this.showLoginPage();
+        }
+        this.bindLoginEvents();
+    }
+
+    bindLoginEvents() {
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin();
+            });
+        }
+    }
+
+    async handleLogin() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const errorEl = document.getElementById('login-error');
+
+        // 清除之前的错误信息
+        errorEl.style.display = 'none';
+
+        if (!username || !password) {
+            this.showLoginError('请输入用户名和密码');
+            return;
+        }
+
+        // 验证用户名和密码
+        if (username === 'demo' && password === 'demo') {
+            // 登录成功
+            localStorage.setItem('admin_logged_in', 'true');
+            localStorage.setItem('admin_username', username);
+            this.isLoggedIn = true;
+            this.showAdminPanel();
+            
+            // 初始化管理系统
+            if (window.adminSystem) {
+                window.adminSystem.loadUsers();
+            }
+        } else {
+            this.showLoginError('用户名或密码错误');
+        }
+    }
+
+    showLoginError(message) {
+        const errorEl = document.getElementById('login-error');
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+    }
+
+    showLoginPage() {
+        document.getElementById('login-container').style.display = 'flex';
+        document.getElementById('admin-container').style.display = 'none';
+    }
+
+    showAdminPanel() {
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('admin-container').style.display = 'flex';
+    }
+
+    logout() {
+        localStorage.removeItem('admin_logged_in');
+        localStorage.removeItem('admin_username');
+        this.isLoggedIn = false;
+        this.showLoginPage();
+        
+        // 清空表单
+        document.getElementById('login-form').reset();
+        document.getElementById('login-error').style.display = 'none';
+    }
+}
+
 // 管理系统主要功能
 class AdminSystem {
     constructor() {
@@ -12,7 +96,10 @@ class AdminSystem {
 
     init() {
         this.bindEvents();
-        this.loadUsers();
+        // 只有在已登录状态下才加载用户数据
+        if (window.loginManager && window.loginManager.isLoggedIn) {
+            this.loadUsers();
+        }
     }
 
     // 绑定事件
@@ -53,6 +140,7 @@ class AdminSystem {
         const breadcrumbMap = {
             'dashboard': '仪表盘',
             'users': '用户管理',
+            'operations': '操作记录',
             'settings': '系统设置'
         };
         document.getElementById('breadcrumb-text').textContent = breadcrumbMap[page];
@@ -62,6 +150,11 @@ class AdminSystem {
         // 如果切换到用户页面，刷新用户列表
         if (page === 'users') {
             this.loadUsers();
+        }
+        
+        // 如果切换到操作记录页面，加载操作记录
+        if (page === 'operations') {
+            this.loadOperations();
         }
     }
 
@@ -98,6 +191,7 @@ class AdminSystem {
                 email: 'zhangsan@example.com',
                 address: '北京市朝阳区',
                 signature: '这是一个测试用户',
+                avatar: 'https://via.placeholder.com/100x100/4CAF50/white?text=张',
                 created_at: '2024-01-15T08:30:00Z',
                 last_login: '2024-01-20T10:15:00Z'
             },
@@ -109,6 +203,7 @@ class AdminSystem {
                 email: 'lisi@example.com',
                 address: '上海市浦东新区',
                 signature: '热爱生活，热爱工作',
+                avatar: 'https://via.placeholder.com/100x100/2196F3/white?text=李',
                 created_at: '2024-01-16T09:20:00Z',
                 last_login: '2024-01-21T14:30:00Z'
             },
@@ -120,6 +215,7 @@ class AdminSystem {
                 email: 'wangwu@example.com',
                 address: '广州市天河区',
                 signature: '追求卓越，永不止步',
+                avatar: '',
                 created_at: '2024-01-17T11:45:00Z',
                 last_login: '2024-01-22T16:20:00Z'
             }
@@ -133,8 +229,13 @@ class AdminSystem {
 
         this.users.forEach(user => {
             const row = document.createElement('tr');
+            const avatarHtml = user.avatar ? 
+                `<img src="${user.avatar}" alt="头像" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">` : 
+                `<div style="width: 40px; height: 40px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">无</div>`;
+            
             row.innerHTML = `
                 <td>${user.id || user.openid}</td>
+                <td>${avatarHtml}</td>
                 <td>${user.nickname || '未设置'}</td>
                 <td>${user.phone || '未设置'}</td>
                 <td>${user.email || '未设置'}</td>
@@ -184,6 +285,7 @@ class AdminSystem {
         document.getElementById('user-email').value = user.email || '';
         document.getElementById('user-address').value = user.address || '';
         document.getElementById('user-signature').value = user.signature || '';
+        document.getElementById('user-avatar').value = user.avatar || '';
         
         document.getElementById('user-modal').classList.add('show');
     }
@@ -201,7 +303,8 @@ class AdminSystem {
             phone: document.getElementById('user-phone').value.trim(),
             email: document.getElementById('user-email').value.trim(),
             address: document.getElementById('user-address').value.trim(),
-            signature: document.getElementById('user-signature').value.trim()
+            signature: document.getElementById('user-signature').value.trim(),
+            avatar: document.getElementById('user-avatar').value.trim()
         };
 
         // 验证必填字段
@@ -313,6 +416,110 @@ class AdminSystem {
         return await response.json();
     }
 
+    // 加载操作记录
+    async loadOperations() {
+        const loadingEl = document.getElementById('operations-loading');
+        const errorEl = document.getElementById('operations-error');
+        const tableEl = document.getElementById('operations-table');
+        const emptyEl = document.getElementById('operations-empty');
+        
+        // 显示加载状态
+        loadingEl.style.display = 'block';
+        errorEl.style.display = 'none';
+        tableEl.style.display = 'none';
+        emptyEl.style.display = 'none';
+        
+        try {
+            const response = await this.apiRequest('/api/operations', {
+                method: 'GET'
+            });
+            
+            loadingEl.style.display = 'none';
+            
+            if (response.success && response.data) {
+                if (response.data.length > 0) {
+                    this.renderOperationsTable(response.data);
+                    tableEl.style.display = 'table';
+                } else {
+                    emptyEl.style.display = 'block';
+                }
+            } else {
+                errorEl.style.display = 'block';
+                console.error('加载操作记录失败:', response.error);
+            }
+        } catch (error) {
+            console.error('加载操作记录失败:', error);
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'block';
+        }
+    }
+    
+    // 渲染操作记录表格
+    renderOperationsTable(operations) {
+        const tbody = document.getElementById('operations-tbody');
+        tbody.innerHTML = '';
+        
+        operations.forEach(operation => {
+            const row = document.createElement('tr');
+            
+            // 操作类型显示
+            const typeMap = {
+                'open': '开门',
+                'close': '关门',
+                'pause': '暂停',
+                'stop': '停止'
+            };
+            const typeText = typeMap[operation.type] || operation.type;
+            
+            // 状态显示
+            const statusText = operation.success ? '成功' : '失败';
+            const statusClass = operation.success ? 'success' : 'error';
+            
+            // 用户代理简化显示
+            const userAgent = operation.userAgent || '';
+            const shortUserAgent = userAgent.length > 30 ? userAgent.substring(0, 30) + '...' : userAgent;
+            
+            row.innerHTML = `
+                <td><span class="operation-type">${typeText}</span></td>
+                <td>${operation.deviceId || 'N/A'}</td>
+                <td>${this.formatDate(operation.time)}</td>
+                <td><span class="status-${statusClass}">${statusText}</span></td>
+                <td title="${userAgent}">${shortUserAgent}</td>
+                <td>${this.formatDate(operation.created_at)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // 添加状态样式
+        if (!document.querySelector('#operation-styles')) {
+            const style = document.createElement('style');
+            style.id = 'operation-styles';
+            style.textContent = `
+                .operation-type {
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    background: #e6f7ff;
+                    color: #1890ff;
+                    font-size: 12px;
+                }
+                .status-success {
+                    color: #52c41a;
+                    font-weight: 500;
+                }
+                .status-error {
+                    color: #ff4d4f;
+                    font-weight: 500;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    // 刷新操作记录
+    refreshOperations() {
+        this.loadOperations();
+    }
+
     // 显示消息
     showMessage(message, type = 'info') {
         // 创建消息元素
@@ -365,19 +572,36 @@ class AdminSystem {
 
 // 全局函数，供HTML调用
 function showAddUserModal() {
-    adminSystem.showAddUserModal();
+    if (adminSystem) adminSystem.showAddUserModal();
 }
 
 function hideUserModal() {
-    adminSystem.hideUserModal();
+    if (adminSystem) adminSystem.hideUserModal();
 }
 
 function saveUser() {
-    adminSystem.saveUser();
+    if (adminSystem) adminSystem.saveUser();
 }
 
-// 初始化管理系统
+function refreshOperations() {
+    if (adminSystem) adminSystem.refreshOperations();
+}
+
+function logout() {
+    if (loginManager) loginManager.logout();
+}
+
+// 初始化系统
 let adminSystem;
+let loginManager;
+
 document.addEventListener('DOMContentLoaded', () => {
+    // 先初始化登录管理器
+    loginManager = new LoginManager();
+    // 再初始化管理系统
     adminSystem = new AdminSystem();
+    
+    // 将实例挂载到window对象，方便其他地方访问
+    window.loginManager = loginManager;
+    window.adminSystem = adminSystem;
 });
