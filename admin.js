@@ -15,19 +15,31 @@ class LoginManager {
     }
 
     bindLoginEvents() {
-        const loginForm = document.getElementById('login-form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleLogin();
-            });
-        }
+        // 登录事件绑定已移至主初始化函数中
+        console.log('bindLoginEvents 被调用，但事件绑定已在主初始化中完成');
     }
 
     async handleLogin() {
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value.trim();
+        console.log('开始处理登录请求...');
+        
+        const usernameEl = document.getElementById('username');
+        const passwordEl = document.getElementById('password');
         const errorEl = document.getElementById('login-error');
+        
+        if (!usernameEl || !passwordEl || !errorEl) {
+            console.error('登录表单元素未找到:', {
+                username: !!usernameEl,
+                password: !!passwordEl,
+                error: !!errorEl
+            });
+            alert('页面加载异常，请刷新页面重试');
+            return;
+        }
+        
+        const username = usernameEl.value.trim();
+        const password = passwordEl.value.trim();
+        
+        console.log('登录信息:', { username, passwordLength: password.length });
 
         // 清除之前的错误信息
         errorEl.style.display = 'none';
@@ -39,18 +51,31 @@ class LoginManager {
 
         // 验证用户名和密码
         if (username === 'demo' && password === 'demo') {
+            console.log('登录验证成功，开始切换界面...');
+            
             // 登录成功
             localStorage.setItem('admin_logged_in', 'true');
             localStorage.setItem('admin_username', username);
             this.isLoggedIn = true;
-            this.showAdminPanel();
             
-            // 初始化管理系统
-            if (window.adminSystem) {
-                window.adminSystem.loadUsers();
-                window.adminSystem.updateSystemInfo();
+            try {
+                this.showAdminPanel();
+                console.log('界面切换完成');
+                
+                // 初始化管理系统
+                if (window.adminSystem) {
+                    window.adminSystem.loadUsers();
+                    window.adminSystem.updateSystemInfo();
+                    console.log('管理系统初始化完成');
+                } else {
+                    console.warn('adminSystem 未找到');
+                }
+            } catch (error) {
+                console.error('登录后初始化失败:', error);
+                this.showLoginError('登录后初始化失败，请刷新页面重试');
             }
         } else {
+            console.log('登录验证失败');
             this.showLoginError('用户名或密码错误');
         }
     }
@@ -673,17 +698,133 @@ function logout() {
     if (loginManager) loginManager.logout();
 }
 
+// 诊断工具函数
+function runDiagnostics() {
+    const resultsEl = document.getElementById('diagnostic-results');
+    resultsEl.style.display = 'block';
+    
+    const results = [];
+    
+    // 检查基本环境
+    results.push(`<strong>环境检查:</strong>`);
+    results.push(`- 当前URL: ${window.location.href}`);
+    results.push(`- 用户代理: ${navigator.userAgent}`);
+    results.push(`- 本地存储支持: ${typeof(Storage) !== "undefined" ? '✓' : '✗'}`);
+    
+    // 检查关键DOM元素
+    results.push(`<br><strong>DOM元素检查:</strong>`);
+    const elements = {
+        'username': document.getElementById('username'),
+        'password': document.getElementById('password'),
+        'login-error': document.getElementById('login-error'),
+        'login-container': document.getElementById('login-container'),
+        'admin-container': document.getElementById('admin-container')
+    };
+    
+    for (const [name, el] of Object.entries(elements)) {
+        results.push(`- ${name}: ${el ? '✓' : '✗'}`);
+    }
+    
+    // 检查JavaScript对象
+    results.push(`<br><strong>JavaScript对象检查:</strong>`);
+    results.push(`- window.loginManager: ${window.loginManager ? '✓' : '✗'}`);
+    results.push(`- window.adminSystem: ${window.adminSystem ? '✓' : '✗'}`);
+    
+    // 检查登录状态
+    results.push(`<br><strong>登录状态:</strong>`);
+    results.push(`- 本地存储登录状态: ${localStorage.getItem('admin_logged_in') || '未设置'}`);
+    results.push(`- LoginManager状态: ${window.loginManager ? window.loginManager.isLoggedIn : '未知'}`);
+    
+    resultsEl.innerHTML = results.join('<br>');
+}
+
+function testLogin() {
+    const resultsEl = document.getElementById('diagnostic-results');
+    resultsEl.style.display = 'block';
+    
+    try {
+        // 设置测试凭据
+        const usernameEl = document.getElementById('username');
+        const passwordEl = document.getElementById('password');
+        
+        if (usernameEl && passwordEl) {
+            usernameEl.value = 'demo';
+            passwordEl.value = 'demo';
+            
+            resultsEl.innerHTML = '正在测试登录功能...<br>';
+            
+            // 触发登录
+            if (window.loginManager) {
+                window.loginManager.handleLogin().then(() => {
+                    resultsEl.innerHTML += '登录测试完成，请检查控制台日志。';
+                }).catch(error => {
+                    resultsEl.innerHTML += `登录测试失败: ${error.message}`;
+                });
+            } else {
+                resultsEl.innerHTML += 'LoginManager未找到，无法执行测试。';
+            }
+        } else {
+            resultsEl.innerHTML = '登录表单元素未找到，无法执行测试。';
+        }
+    } catch (error) {
+        resultsEl.innerHTML = `测试过程中发生错误: ${error.message}`;
+    }
+}
+
+function clearStorage() {
+    localStorage.clear();
+    sessionStorage.clear();
+    alert('本地存储已清除，页面将刷新。');
+    window.location.reload();
+}
+
 // 初始化系统
 let adminSystem;
 let loginManager;
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM加载完成，开始初始化系统...');
+    
     // 先初始化登录管理器
     loginManager = new LoginManager();
+    console.log('LoginManager初始化完成');
+    
     // 再初始化管理系统
     adminSystem = new AdminSystem();
+    console.log('AdminSystem初始化完成');
     
     // 将实例挂载到window对象，方便其他地方访问
     window.loginManager = loginManager;
     window.adminSystem = adminSystem;
+    
+    // 绑定登录表单事件
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        console.log('找到登录表单，绑定事件...');
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('登录表单提交事件触发');
+            window.loginManager.handleLogin();
+        });
+        
+        // 也绑定回车键事件
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        
+        if (usernameInput && passwordInput) {
+            [usernameInput, passwordInput].forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        console.log('回车键触发登录');
+                        window.loginManager.handleLogin();
+                    }
+                });
+            });
+        }
+    } else {
+        console.error('未找到登录表单元素');
+    }
+    
+    console.log('系统初始化完成');
 });

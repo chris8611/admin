@@ -632,16 +632,25 @@
                         <div class="card-body">
                             <p><strong>如果在自定义域名下登录无反应，可能的原因：</strong></p>
                             <ul>
-                                <li>自定义域名下API服务不可用（系统会自动切换到模拟数据模式）</li>
-                                <li>跨域请求被阻止</li>
-                                <li>网络连接问题</li>
+                                <li>JavaScript加载或执行错误</li>
+                                <li>DOM元素未正确加载</li>
+                                <li>事件绑定失败</li>
+                                <li>浏览器兼容性问题</li>
                             </ul>
                             <p><strong>解决方案：</strong></p>
                             <ul>
                                 <li>检查浏览器控制台是否有错误信息</li>
-                                <li>确认自定义域名的后端API服务配置</li>
-                                <li>在本地或默认Pages域名下测试功能</li>
+                                <li>使用下方的测试功能诊断问题</li>
+                                <li>尝试刷新页面或清除浏览器缓存</li>
+                                <li>在不同浏览器中测试</li>
                             </ul>
+                            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <h4 style="margin-bottom: 10px;">诊断工具</h4>
+                                <button class="btn btn-primary" onclick="runDiagnostics()" style="margin-right: 10px;">运行诊断</button>
+                                <button class="btn btn-secondary" onclick="testLogin()" style="margin-right: 10px;">测试登录功能</button>
+                                <button class="btn btn-secondary" onclick="clearStorage()">清除本地存储</button>
+                                <div id="diagnostic-results" style="margin-top: 15px; padding: 10px; background: white; border-radius: 4px; display: none;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
