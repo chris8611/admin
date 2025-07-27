@@ -7,7 +7,12 @@ class AdminSystem {
         this.apiBase = 'https://backend.hackpro.tech';
         this.token = localStorage.getItem('admin_token');
         
-        this.init();
+        // 确保DOM加载完成后再初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
     }
 
     init() {
@@ -502,6 +507,13 @@ function refreshOperations() {
 
 // 初始化管理系统
 let adminSystem;
-document.addEventListener('DOMContentLoaded', () => {
+
+// 确保在DOM加载完成后初始化
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        adminSystem = new AdminSystem();
+    });
+} else {
+    // DOM已经加载完成，直接初始化
     adminSystem = new AdminSystem();
-});
+}
