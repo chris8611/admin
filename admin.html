@@ -372,6 +372,35 @@
             text-align: center;
         }
 
+        /* 系统信息样式 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #1890ff;
+        }
+
+        .info-item label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .info-item span {
+            color: #666;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
         /* 响应式 */
         @media (max-width: 768px) {
             .sidebar {
@@ -385,6 +414,10 @@
             .login-card {
                 margin: 20px;
                 padding: 30px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -569,10 +602,46 @@
                     </div>
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">基本设置</h3>
+                            <h3 class="card-title">系统信息</h3>
                         </div>
                         <div class="card-body">
-                            <p>系统设置功能正在开发中...</p>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>当前域名:</label>
+                                    <span id="current-hostname">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>API地址:</label>
+                                    <span id="current-api-base">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>运行模式:</label>
+                                    <span id="current-mode">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>登录状态:</label>
+                                    <span id="login-status">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">故障排除</h3>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>如果在自定义域名下登录无反应，可能的原因：</strong></p>
+                            <ul>
+                                <li>自定义域名下API服务不可用（系统会自动切换到模拟数据模式）</li>
+                                <li>跨域请求被阻止</li>
+                                <li>网络连接问题</li>
+                            </ul>
+                            <p><strong>解决方案：</strong></p>
+                            <ul>
+                                <li>检查浏览器控制台是否有错误信息</li>
+                                <li>确认自定义域名的后端API服务配置</li>
+                                <li>在本地或默认Pages域名下测试功能</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

@@ -48,6 +48,7 @@ class LoginManager {
             // 初始化管理系统
             if (window.adminSystem) {
                 window.adminSystem.loadUsers();
+                window.adminSystem.updateSystemInfo();
             }
         } else {
             this.showLoginError('用户名或密码错误');
@@ -79,6 +80,11 @@ class LoginManager {
         // 清空表单
         document.getElementById('login-form').reset();
         document.getElementById('login-error').style.display = 'none';
+        
+        // 更新系统信息
+        if (window.adminSystem) {
+            window.adminSystem.updateSystemInfo();
+        }
     }
 }
 
@@ -88,7 +94,18 @@ class AdminSystem {
         this.currentPage = 'dashboard';
         this.users = [];
         this.editingUserId = null;
-        this.apiBase = 'https://backend.hackpro.tech';
+        // 根据当前域名动态设置API基础URL
+        const currentHost = window.location.hostname;
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+            // 本地开发环境
+            this.apiBase = 'https://backend.hackpro.tech';
+        } else if (currentHost.includes('github.io') || currentHost.includes('pages.dev')) {
+            // GitHub Pages 或其他默认Pages域名
+            this.apiBase = 'https://backend.hackpro.tech';
+        } else {
+            // 自定义域名，使用相对路径或同域API
+            this.apiBase = window.location.origin + '/api';
+        }
         this.token = localStorage.getItem('admin_token');
         
         this.init();
@@ -100,6 +117,8 @@ class AdminSystem {
         if (window.loginManager && window.loginManager.isLoggedIn) {
             this.loadUsers();
         }
+        // 初始化系统信息
+        setTimeout(() => this.updateSystemInfo(), 100);
     }
 
     // 绑定事件
@@ -155,6 +174,11 @@ class AdminSystem {
         // 如果切换到操作记录页面，加载操作记录
         if (page === 'operations') {
             this.loadOperations();
+        }
+        
+        // 如果切换到设置页面，更新系统信息
+        if (page === 'settings') {
+            this.updateSystemInfo();
         }
     }
 
@@ -412,8 +436,42 @@ class AdminSystem {
             config.body = JSON.stringify(options.data);
         }
 
-        const response = await fetch(this.apiBase + url, config);
-        return await response.json();
+        try {
+            const response = await fetch(this.apiBase + url, config);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.warn(`API请求失败 (${this.apiBase + url}):`, error.message);
+            // 如果是自定义域名且API不可用，返回模拟响应
+            if (!window.location.hostname.includes('localhost') && 
+                !window.location.hostname.includes('github.io') && 
+                !window.location.hostname.includes('pages.dev')) {
+                return this.getMockApiResponse(url, options);
+            }
+            throw error;
+        }
+    }
+
+    // 模拟API响应（用于自定义域名下的降级方案）
+    getMockApiResponse(url, options) {
+        if (url === '/api/admin/users' && options.method === 'GET') {
+            return {
+                success: true,
+                data: this.getMockUsers()
+            };
+        }
+        if (url === '/api/operations' && options.method === 'GET') {
+            return {
+                success: true,
+                data: []
+            };
+        }
+        return {
+            success: false,
+            error: 'API不可用，请检查网络连接或联系管理员'
+        };
     }
 
     // 加载操作记录
@@ -518,6 +576,30 @@ class AdminSystem {
     // 刷新操作记录
     refreshOperations() {
         this.loadOperations();
+    }
+
+    // 更新系统信息显示
+    updateSystemInfo() {
+        const hostname = window.location.hostname;
+        const currentMode = this.getCurrentMode();
+        const loginStatus = window.loginManager && window.loginManager.isLoggedIn ? '已登录' : '未登录';
+        
+        document.getElementById('current-hostname').textContent = hostname;
+        document.getElementById('current-api-base').textContent = this.apiBase;
+        document.getElementById('current-mode').textContent = currentMode;
+        document.getElementById('login-status').textContent = loginStatus;
+    }
+    
+    // 获取当前运行模式
+    getCurrentMode() {
+        const hostname = window.location.hostname;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return '本地开发';
+        } else if (hostname.includes('github.io') || hostname.includes('pages.dev')) {
+            return 'Pages默认域名';
+        } else {
+            return '自定义域名 (模拟数据模式)';
+        }
     }
 
     // 显示消息
