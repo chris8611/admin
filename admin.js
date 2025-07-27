@@ -437,6 +437,29 @@ class AdminSystem {
     refreshOperations() {
         this.loadOperations();
     }
+    
+    // 清空操作记录
+    async clearOperations() {
+        if (!confirm('确定要清空所有操作记录吗？此操作不可恢复！')) {
+            return;
+        }
+        
+        try {
+            const response = await this.apiRequest('/api/operations', {
+                method: 'DELETE'
+            });
+            
+            if (response.success) {
+                this.showMessage('操作记录已清空', 'success');
+                this.loadOperations(); // 重新加载列表
+            } else {
+                this.showMessage('清空失败：' + (response.error || '未知错误'), 'error');
+            }
+        } catch (error) {
+            console.error('清空操作记录失败:', error);
+            this.showMessage('清空失败：网络错误', 'error');
+        }
+    }
 
     // 显示消息
     showMessage(message, type = 'info') {
@@ -503,6 +526,10 @@ function saveUser() {
 
 function refreshOperations() {
     adminSystem.refreshOperations();
+}
+
+function clearOperations() {
+    adminSystem.clearOperations();
 }
 
 // 初始化管理系统
