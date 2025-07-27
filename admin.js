@@ -209,6 +209,8 @@ class AdminSystem {
 
     // 加载用户列表
     async loadUsers() {
+        console.log('开始加载用户列表...');
+        
         try {
             const response = await this.apiRequest('/api/admin/users', {
                 method: 'GET'
@@ -216,60 +218,25 @@ class AdminSystem {
 
             if (response.success) {
                 this.users = response.data || [];
+                console.log(`成功加载 ${this.users.length} 个用户`);
                 this.renderUsersTable();
+                this.showMessage(`成功加载 ${this.users.length} 个用户`, 'success');
             } else {
                 console.error('加载用户失败:', response.error);
-                this.showMessage('加载用户失败', 'error');
+                this.showMessage(`加载用户失败: ${response.error}`, 'error');
+                // 只有在API返回错误时才显示空列表
+                this.users = [];
+                this.renderUsersTable();
             }
         } catch (error) {
             console.error('加载用户失败:', error);
-            // 如果API失败，显示模拟数据
-            this.users = this.getMockUsers();
+            this.showMessage(`加载用户失败: ${error.message}`, 'error');
+            this.users = [];
             this.renderUsersTable();
         }
     }
 
-    // 获取模拟用户数据
-    getMockUsers() {
-        return [
-            {
-                id: 1,
-                openid: 'mock_openid_1',
-                nickname: '张三',
-                phone: '13800138001',
-                email: 'zhangsan@example.com',
-                address: '北京市朝阳区',
-                signature: '这是一个测试用户',
-                avatar: 'https://via.placeholder.com/100x100/4CAF50/white?text=张',
-                created_at: '2024-01-15T08:30:00Z',
-                last_login: '2024-01-20T10:15:00Z'
-            },
-            {
-                id: 2,
-                openid: 'mock_openid_2',
-                nickname: '李四',
-                phone: '13800138002',
-                email: 'lisi@example.com',
-                address: '上海市浦东新区',
-                signature: '热爱生活，热爱工作',
-                avatar: 'https://via.placeholder.com/100x100/2196F3/white?text=李',
-                created_at: '2024-01-16T09:20:00Z',
-                last_login: '2024-01-21T14:30:00Z'
-            },
-            {
-                id: 3,
-                openid: 'mock_openid_3',
-                nickname: '王五',
-                phone: '13800138003',
-                email: 'wangwu@example.com',
-                address: '广州市天河区',
-                signature: '追求卓越，永不止步',
-                avatar: '',
-                created_at: '2024-01-17T11:45:00Z',
-                last_login: '2024-01-22T16:20:00Z'
-            }
-        ];
-    }
+
 
     // 渲染用户表格
     renderUsersTable() {
@@ -399,25 +366,7 @@ class AdminSystem {
             }
         } catch (error) {
             console.error('保存用户失败:', error);
-            // 模拟保存成功
-            if (this.editingUserId) {
-                const userIndex = this.users.findIndex(u => (u.openid || u.id) == this.editingUserId);
-                if (userIndex !== -1) {
-                    this.users[userIndex] = { ...this.users[userIndex], ...formData };
-                }
-            } else {
-                const newUser = {
-                    id: Date.now(),
-                    openid: `mock_${Date.now()}`,
-                    ...formData,
-                    created_at: new Date().toISOString(),
-                    last_login: new Date().toISOString()
-                };
-                this.users.push(newUser);
-            }
-            this.renderUsersTable();
-            this.showMessage(this.editingUserId ? '用户更新成功' : '用户添加成功', 'success');
-            this.hideUserModal();
+            this.showMessage(`保存用户失败: ${error.message}`, 'error');
         }
     }
 
@@ -440,10 +389,7 @@ class AdminSystem {
             }
         } catch (error) {
             console.error('删除用户失败:', error);
-            // 模拟删除成功
-            this.users = this.users.filter(u => (u.openid || u.id) != userId);
-            this.renderUsersTable();
-            this.showMessage('用户删除成功', 'success');
+            this.showMessage(`删除用户失败: ${error.message}`, 'error');
         }
     }
 
@@ -461,43 +407,27 @@ class AdminSystem {
             config.body = JSON.stringify(options.data);
         }
 
+        const fullUrl = this.apiBase + url;
+        console.log(`发起API请求: ${options.method || 'GET'} ${fullUrl}`);
+
         try {
-            const response = await fetch(this.apiBase + url, config);
+            const response = await fetch(fullUrl, config);
+            console.log(`API响应状态: ${response.status} ${response.statusText}`);
+            
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            return await response.json();
+            
+            const data = await response.json();
+            console.log('API响应数据:', data);
+            return data;
         } catch (error) {
-            console.warn(`API请求失败 (${this.apiBase + url}):`, error.message);
-            // 如果是自定义域名且API不可用，返回模拟响应
-            if (!window.location.hostname.includes('localhost') && 
-                !window.location.hostname.includes('github.io') && 
-                !window.location.hostname.includes('pages.dev')) {
-                return this.getMockApiResponse(url, options);
-            }
+            console.error(`API请求失败 (${fullUrl}):`, error.message);
             throw error;
         }
     }
 
-    // 模拟API响应（用于自定义域名下的降级方案）
-    getMockApiResponse(url, options) {
-        if (url === '/api/admin/users' && options.method === 'GET') {
-            return {
-                success: true,
-                data: this.getMockUsers()
-            };
-        }
-        if (url === '/api/operations' && options.method === 'GET') {
-            return {
-                success: true,
-                data: []
-            };
-        }
-        return {
-            success: false,
-            error: 'API不可用，请检查网络连接或联系管理员'
-        };
-    }
+
 
     // 加载操作记录
     async loadOperations() {
@@ -623,7 +553,7 @@ class AdminSystem {
         } else if (hostname.includes('github.io') || hostname.includes('pages.dev')) {
             return 'Pages默认域名';
         } else {
-            return '自定义域名 (模拟数据模式)';
+            return '自定义域名';
         }
     }
 
@@ -776,6 +706,54 @@ function clearStorage() {
     sessionStorage.clear();
     alert('本地存储已清除，页面将刷新。');
     window.location.reload();
+}
+
+function testApiConnection() {
+    const resultsEl = document.getElementById('diagnostic-results');
+    resultsEl.style.display = 'block';
+    resultsEl.innerHTML = '正在测试API连接...<br>';
+    
+    if (!window.adminSystem) {
+        resultsEl.innerHTML += '错误：AdminSystem未初始化<br>';
+        return;
+    }
+    
+    const apiBase = window.adminSystem.apiBase;
+    resultsEl.innerHTML += `API基础地址: ${apiBase}<br>`;
+    
+    // 测试用户API
+    resultsEl.innerHTML += '正在测试用户API...<br>';
+    
+    window.adminSystem.apiRequest('/api/admin/users', { method: 'GET' })
+        .then(response => {
+            resultsEl.innerHTML += `✓ 用户API响应成功<br>`;
+            resultsEl.innerHTML += `- 成功状态: ${response.success}<br>`;
+            if (response.success && response.data) {
+                resultsEl.innerHTML += `- 用户数量: ${response.data.length}<br>`;
+                if (response.data.length > 0) {
+                    resultsEl.innerHTML += `- 第一个用户: ${response.data[0].nickname || response.data[0].openid}<br>`;
+                }
+            } else {
+                resultsEl.innerHTML += `- 错误信息: ${response.error || '未知错误'}<br>`;
+            }
+            
+            // 测试操作记录API
+            resultsEl.innerHTML += '<br>正在测试操作记录API...<br>';
+            return window.adminSystem.apiRequest('/api/operations', { method: 'GET' });
+        })
+        .then(response => {
+            resultsEl.innerHTML += `✓ 操作记录API响应成功<br>`;
+            resultsEl.innerHTML += `- 成功状态: ${response.success}<br>`;
+            if (response.success && response.data) {
+                resultsEl.innerHTML += `- 操作记录数量: ${response.data.length}<br>`;
+            }
+            resultsEl.innerHTML += '<br><strong>API连接测试完成！</strong><br>';
+        })
+        .catch(error => {
+            resultsEl.innerHTML += `✗ API连接失败: ${error.message}<br>`;
+            resultsEl.innerHTML += `- 这可能表示后端服务不可用或网络连接问题<br>`;
+            resultsEl.innerHTML += `- 系统将自动使用模拟数据作为降级方案<br>`;
+        });
 }
 
 // 初始化系统

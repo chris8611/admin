@@ -645,10 +645,20 @@
                                 <li>在不同浏览器中测试</li>
                             </ul>
                             <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
-                                <h4 style="margin-bottom: 10px;">诊断工具</h4>
-                                <button class="btn btn-primary" onclick="runDiagnostics()" style="margin-right: 10px;">运行诊断</button>
-                                <button class="btn btn-secondary" onclick="testLogin()" style="margin-right: 10px;">测试登录功能</button>
-                                <button class="btn btn-secondary" onclick="clearStorage()">清除本地存储</button>
+                                <h4 style="margin-bottom: 10px;">🔧 诊断工具</h4>
+                                <p>以下工具可以帮助您诊断系统状态和数据连接：</p>
+                                <button class="btn btn-primary" onclick="runDiagnostics()" style="margin-right: 10px;">🔍 运行诊断</button>
+                                <button class="btn btn-secondary" onclick="testLogin()" style="margin-right: 10px;">🧪 测试登录功能</button>
+                                <button class="btn btn-secondary" onclick="testApiConnection()" style="margin-right: 10px;">🌐 测试API连接</button>
+                                <button class="btn btn-secondary" onclick="clearStorage()">🗑️ 清除本地存储</button>
+                                <div style="margin-top: 15px; padding: 10px; background: white; border-radius: 4px;">
+                                    <p><strong>📊 数据来源说明：</strong></p>
+                                    <ul>
+                                        <li>✅ 用户数据：从KV存储获取真实用户信息</li>
+                                        <li>✅ 操作记录：从KV存储获取真实操作日志</li>
+                                        <li>⚠️ 如果API连接失败，请检查后端服务状态</li>
+                                    </ul>
+                                </div>
                                 <div id="diagnostic-results" style="margin-top: 15px; padding: 10px; background: white; border-radius: 4px; display: none;"></div>
                             </div>
                         </div>
