@@ -212,7 +212,7 @@ class AdminSystem {
         console.log('开始加载用户列表...');
         
         try {
-            const response = await this.apiRequest('/api/admin/users', {
+            const response = await this.apiRequest('/admin/users', {
                 method: 'GET'
             });
 
@@ -345,13 +345,13 @@ class AdminSystem {
             let response;
             if (this.editingUserId) {
                 // 编辑用户
-                response = await this.apiRequest(`/api/admin/users/${this.editingUserId}`, {
+                response = await this.apiRequest(`/admin/users/${this.editingUserId}`, {
                     method: 'PUT',
                     data: formData
                 });
             } else {
                 // 添加用户
-                response = await this.apiRequest('/api/admin/users', {
+                response = await this.apiRequest('/admin/users', {
                     method: 'POST',
                     data: formData
                 });
@@ -377,7 +377,7 @@ class AdminSystem {
         }
 
         try {
-            const response = await this.apiRequest(`/api/admin/users/${userId}`, {
+            const response = await this.apiRequest(`/admin/users/${userId}`, {
                 method: 'DELETE'
             });
 
@@ -443,7 +443,7 @@ class AdminSystem {
         emptyEl.style.display = 'none';
         
         try {
-            const response = await this.apiRequest('/api/operations', {
+            const response = await this.apiRequest('/operations', {
                 method: 'GET'
             });
             
@@ -724,7 +724,7 @@ function testApiConnection() {
     // 测试用户API
     resultsEl.innerHTML += '正在测试用户API...<br>';
     
-    window.adminSystem.apiRequest('/api/admin/users', { method: 'GET' })
+    window.adminSystem.apiRequest('/admin/users', { method: 'GET' })
         .then(response => {
             resultsEl.innerHTML += `✓ 用户API响应成功<br>`;
             resultsEl.innerHTML += `- 成功状态: ${response.success}<br>`;
@@ -739,7 +739,7 @@ function testApiConnection() {
             
             // 测试操作记录API
             resultsEl.innerHTML += '<br>正在测试操作记录API...<br>';
-            return window.adminSystem.apiRequest('/api/operations', { method: 'GET' });
+            return window.adminSystem.apiRequest('/operations', { method: 'GET' });
         })
         .then(response => {
             resultsEl.innerHTML += `✓ 操作记录API响应成功<br>`;
